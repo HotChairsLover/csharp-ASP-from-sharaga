@@ -1,0 +1,58 @@
+﻿@using Shop.Data.ViewModell;
+@using Shop.Data.Models;
+@using Shop.Data.DataBase;
+@model VMItems
+@{
+    Layout = "_Layout";
+}
+<form method="post" enctype="multipart/form-data">
+    @{
+        var id = Convert.ToInt32(Context.Request.Query["id"]);
+        Items item = null;
+        foreach(Items itm in Model.Items)
+        {
+            if(itm.Id == id)
+            {
+                item = itm;
+                break;
+            }
+        }
+        <input name="id" value="@id"  hidden/>
+        <div>
+            Наименование:
+            <br /><input name="name" placeholder="Наименование:" value="@item.Name"/>
+        </div>
+        <div>
+            Описание:
+            <br /><input name="description" placeholder="Описание:" value="@item.Description" />
+        </div>
+        <div>
+            <label for="file">Изображение</label>
+            <br /><input name="files" type="file" placeholder="Изменить файл"/>
+        </div>
+        <div>
+            Стоимость:
+            <br /><input name="price" value="@item.Price"/>
+        </div>
+        <div>
+            Категория:
+            <br /><select name="idCategory">
+                @{
+                    <option value="@item.Category.Id">@item.Category.Name</option>
+                    foreach (var Category in Model.Categorys)
+                    {
+                        if(Category.Id != item.Category.Id) 
+                        { 
+                            <option value="@Category.Id">@Category.Name</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+        <div>
+            Удаление:
+            <br /><input type="checkbox" name="deleteItem" />
+        </div>
+    }
+    <input type="submit" value="Обновить" />
+</form>

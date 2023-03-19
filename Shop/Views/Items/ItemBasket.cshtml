@@ -1,0 +1,25 @@
+﻿@using Shop.Data.ViewModell;
+@using Shop.Data.Models;
+@using Shop.Data.DataBase;
+@using Shop;
+@{
+    Layout = "_Layout";
+}
+<h2>Все предметы</h2>
+@{
+    List<ItemsBasket> itemsList = Startup.BasketItem;
+    foreach(ItemsBasket item in itemsList)
+    {
+    <div class="item">
+        <img src="@item.Img" />
+        <div class="data">
+            <h3>Модель: @item.Name</h3>
+            <div>Цена: @item.Price.ToString("c")</div>
+            <div>Категория: @item.Category.Name</div>
+            <div>Описание: @item.Description</div>
+            <div>Количество: @item.Count</div>
+        </div>
+
+    </div>
+    } 
+}

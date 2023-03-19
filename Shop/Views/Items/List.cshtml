@@ -1,0 +1,184 @@
+﻿@using Shop.Data.ViewModell;
+@using Shop.Data.Models;
+@using Shop.Data.DataBase;
+@using Shop;
+@model VMItems
+@{
+    Layout = "_Layout";
+}
+<div class="header">
+    <img src="~/img/icon.png" />
+    <input type="text" class="search" id="search" placeholder="Поиск по сайту" />
+    <img class="headerbasket" src="~/img/basket.png" />
+    <div class="basketNumber">0</div>
+</div>
+<div>
+    <select id="categoryFilter">
+        <option value="0">Выбрать ...</option>
+        @{
+            foreach (var Category in Model.Categorys)
+            {
+                if (Category.Id == Model.SelectCategory)
+                {
+                    <option selected="selected" value="@Category.Id">@Category.Name</option>
+                }
+                else
+                {
+                    <option value="@Category.Id">@Category.Name</option>
+                }
+            }
+        }
+    </select>
+    <select id="priceFilter">
+        <option selected="selected" value="0">Сортировка по цене ...</option>
+        <option value="0">Дешевле</option>
+        <option value="1">Дороже</option>
+    </select>
+    <input type="button" onclick="FiltersOn()" value="Применить" />
+    <script>
+        function FiltersOn() {
+            var category = document.getElementById("categoryFilter");
+            var price = document.getElementById("priceFilter");
+            var search = document.getElementById("search");
+            if (search.value != "") {
+                window.location = "?search=" + search.value;
+            }
+            else {
+                window.location = "?id=" + category.value + "&priceSort=" + price.value;
+            }
+        }
+    </script>
+</div>
+<h2>Все предметы</h2>
+@{
+    List<Items> itemsList = new List<Items>();
+    foreach (var item in Model.Items)
+    {
+
+        itemsList.Add(item);
+
+    }
+    if (Model.search != "")
+    {
+        if (Model.PriceSort == 1)
+        {
+            itemsList.Reverse();
+        }
+        foreach (var item in itemsList)
+        {
+            if (item.Name.Contains(Model.search))
+            {
+                if(item.Category.Id == Model.SelectCategory || Model.SelectCategory == 0) 
+                { 
+                    <div class="item">
+                        <img src="@item.Img" />
+                        <div class="data">
+                            <h3>Модель: @item.Name</h3>
+                            <div>Цена: @item.Price.ToString("c")</div>
+                            <div>Категория: @item.Category.Name</div>
+                            <div>Описание: @item.Description</div>
+                        </div>
+                        <div class="basket">
+                            <div class="button" id="@item.Id">В корзину</div>
+                            <div class="count">
+                                <div class="button min">-</div>
+                                <div class="text">1</div>
+                                <div class="button max">+</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        }
+    }
+    else
+    {
+        if (Model.PriceSort == 1)
+        {
+            itemsList.Reverse();
+        }
+        foreach (var item in itemsList)
+        {
+            if (item.Category.Id == Model.SelectCategory || Model.SelectCategory == 0)
+            {
+            <div class="item">
+                <img src="@item.Img" />
+                <div class="data">
+                    <h3>Модель: @item.Name</h3>
+                    <div>Цена: @item.Price.ToString("c")</div>
+                    <div>Категория: @item.Category.Name</div>
+                    <div>Описание: @item.Description</div>
+                </div>
+                <div class="basket">
+                    <div class="button" id="@item.Id">В корзину</div>
+                    <div class="count">
+                        <div class="button min">-</div>
+                        <div class="text">1</div>
+                        <div class="button max">+</div>
+                    </div>
+                </div>
+            </div>
+            }
+        }
+    }
+}
+<script>
+    var basketCount = 0;
+    $(".item").children(".basket").children(".button").click(function () {
+        $(this).parent().children(".count").show();
+        $(this).hide();
+        basketCount++;
+        $(".basketNumber").text(basketCount);
+        $.ajax({
+            url: '@Url.Action("Basket", "Items")',
+            contentType: "application/json; charset=utf-8",
+            data: { idItem: $(this).attr('id') },
+            dataType: "json",
+            success: SuccessBasket,
+            error: AjaxError
+        });
+    });
+    $(".count").children(".min").click(function () {
+        var idItem = $(this).parent().parent().children(".button").attr("id");
+        var count = $(this).parent().children(".text").text();
+        count--;
+        if (count == 0) {
+            $(this).parent().parent().children(".button").show();
+            $(this).parent().parent().children(".count").hide();
+            basketCount--;
+        }
+        else {
+            $(this).parent().children(".text").text(count);
+        }
+        $(".basketNumber").text(basketCount);
+        $.ajax({
+            url: '@Url.Action("BasketCount","Items")',
+            contentType: "application/json; charset=utf-8",
+            data: { idItem: idItem, count: count },
+            dataType: "json",
+            success: SuccessBasket,
+            error: AjaxError
+        });
+    });
+    $(".count").children(".max").click(function () {
+        var idItem = $(this).parent().parent().children(".button").attr("id");
+        var count = $(this).parent().children(".text").text();
+        count++;
+        $(this).parent().children(".text").text(count);
+        $(".basketNumber").text(basketCount);
+        $.ajax({
+            url: '@Url.Action("BasketCount","Items")',
+            contentType: "application/json; charset=utf-8",
+            data: { idItem: idItem, count: count },
+            dataType: "json",
+            success: SuccessBasket,
+            error: AjaxError
+        });
+    });
+    function SuccessBasket(data) {
+        console.log(data);
+    }
+    function AjaxError() {
+        console.log("Ошибка выполнения ajax");
+    }
+</script>

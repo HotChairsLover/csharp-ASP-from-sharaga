@@ -1,0 +1,35 @@
+﻿@using Shop.Data.ViewModell;
+@using Shop.Data.Models;
+@using Shop.Data.DataBase;
+@model VMItems
+@{
+    Layout = "_Layout";
+}
+<form method="post" enctype="multipart/form-data">
+    @{
+        var id = Convert.ToInt32(Context.Request.Query["id"]);
+        Categorys category = null;
+        foreach (Categorys categ in Model.Categorys)
+        {
+            if (categ.Id == id)
+            {
+                category = categ;
+                break;
+            }
+        }
+        <input name="id" value="@id" hidden />
+        <div>
+            Наименование:
+            <br /><input name="name" placeholder="Наименование:" value="@category.Name" />
+        </div>
+        <div>
+            Описание:
+            <br /><input name="description" placeholder="Описание:" value="@category.Description" />
+        </div>
+        <div>
+            Удаление:
+            <br /><input type="checkbox" name="deleteCategory" />
+        </div>
+    }
+    <input type="submit" value="Обновить" />
+</form>
